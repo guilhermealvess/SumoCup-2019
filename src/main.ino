@@ -6,15 +6,15 @@ Ultrasonic ultrasonicDireito(trigger, echo);
 #define TRIGGER_dir
 #define ECHO_esq
 #define TRIGGER_esq
-#define BUZZER
+#define BUZZER 9
 
 #define MOTOR_D
 #define MOTOR_E
-#define PWMA 3
-#define PWMB 5
+#define PWMD 3
+#define PWM 5
 
-#define REFLETANCIA_IN
-#define REFLETANCIA_OUT
+#define OPTICO_IN
+#define OPTICO_OUT
 #define BOTAO
 
 #define diametro_arena 77.0
@@ -32,6 +32,7 @@ void setup()
     pinMode(TRIGGER_esq, OUTPUT);
 
     // setando pinos buzzer
+    pinMode(BUZZER, OUTPUT);
 
     // setando pinos ponteH
 
@@ -90,6 +91,18 @@ void giroAntiHorario(int velocidade)
 void tocarBuzzer()
 {
     // Implementar
+    float seno;
+    int frequencia;
+
+    for (int x = 0; x < 180; x++)
+    {
+        //converte graus para radiando e depois obtém o valor do seno
+        seno = (sin(x * 3.1416 / 180));
+        //gera uma frequência a partir do valor do seno
+        frequencia = 2000 + (int(seno * 1000));
+        tone(9, frequencia);
+        delay(1);
+    }
 }
 
 void procurarOponente()
@@ -101,9 +114,12 @@ float getDistancia()
     return 0.1;
 }
 
-bool ring()
+bool arena()
 {
-    return true;
+    analogRead()
+
+        //true para o caso do sensor estar na arena e false para nao
+        return true;
 }
 
 void loop()
@@ -111,7 +127,7 @@ void loop()
     if (digitalRead(BOTAO) == 1)
     {
         tocarBuzzer();
-        delay(5000);
+        delay(5);
 
         while (1)
         {
