@@ -1,23 +1,30 @@
 #include <Ultrasonic.h>
-Ultrasonic ultrasonicEsquerdo(trigger, echo);
-Ultrasonic ultrasonicDireito(trigger, echo);
 
-#define ECHO_dir
-#define TRIGGER_dir
-#define ECHO_esq
-#define TRIGGER_esq
-#define BUZZER 9
+#define ECHO_dir 10
+#define TRIGGER_dir 11
+#define ECHO_esq 12
+#define TRIGGER_esq 13
+Ultrasonic ultrasonicEsquerdo(TRIGGER_esq, ECHO_esq);
+Ultrasonic ultrasonicDireito(TRIGGER_dir, ECHO_dir);
 
-#define MOTOR_D
-#define MOTOR_E
-#define PWMD 3
-#define PWM 5
+#define BUZZER A3
 
-#define OPTICO_IN
-#define OPTICO_OUT
-#define BOTAO
+#define MOTOR_D1 3
+#define MOTOR_D2 4
+#define MOTOR_E1 5
+#define MOTOR_E2 6
+#define PWMD 7
+#define PWM 8
+#define STDBY 9
+
+#define OPTICO_A A0
+#define OPTICO_B A1
+
+#define SHARP A2
 
 #define diametro_arena 77.0
+
+int limiar_piso_black = 500;
 
 void setup()
 {
@@ -34,8 +41,6 @@ void setup()
     // setando pinos buzzer
     pinMode(BUZZER, OUTPUT);
 
-    // setando pinos ponteH
-
     // setando pinos refletancia
 
     // setando pinos botão
@@ -51,41 +56,66 @@ void setup()
 void rodaDireita(int velocidade, bool sentido)
 {
     // true para frente e false para traz
+    if (sentido)
+    {
+        digitalWrite(MOTOR_D1, 1);
+        digitalWrite(MOTOR_D2, 0);
+    }
+    else
+    {
+        digitalWrite(MOTOR_D1, 0);
+        digitalWrite(MOTOR_D2, 1);
+    }
 }
 
 void rodaEsquerda(int velocidade, bool sentido)
 {
     // true para frente e false para traz
+    if (sentido)
+    {
+        digitalWrite(MOTOR_E1, 1);
+        digitalWrite(MOTOR_E2, 0);
+    }
+    else
+    {
+        digitalWrite(MOTOR_E1, 0);
+        digitalWrite(MOTOR_E2, 1);
+    }
 }
 
 void frente(int velocidade)
 {
     rodaDireita(velocidade, true);
     rodaEsquerda(velocidade, true);
+    digitalWrite(STDBY, 1);
 }
 
 void traz(int velocidade)
 {
     rodaDireita(velocidade, false);
     rodaEsquerda(velocidade, false);
+    digitalWrite(STDBY, 1);
 }
 
 void parar()
 {
     digitalWrite(MOTOR_D, 0);
     digitalWrite(MOTOR_E, 0);
+    digitalWrite(STDBY, 0);
 }
 
 void giroHorario(int velocidade)
 {
     rodaEsquerda(velocidade, true);
     rodaDireita(velocidade, false);
+    digitalWrite(STDBY, 1);
 }
 
 void giroAntiHorario(int velocidade)
 {
     rodaEsquerda(velocidade, false);
     rodaDireita(velocidade, true);
+    digitalWrite(STDBY, 1);
 }
 
 void tocarBuzzer()
@@ -100,38 +130,120 @@ void tocarBuzzer()
         seno = (sin(x * 3.1416 / 180));
         //gera uma frequência a partir do valor do seno
         frequencia = 2000 + (int(seno * 1000));
-        tone(9, frequencia);
+        tone(BUZZER, frequencia);
         delay(1);
     }
 }
 
 void procurarOponente()
 {
+    while (isArena() && !isRadarDireito() && !isRadarEsquerdo())
+    {
+        giroHorario(255);
+        delay(0.5);
+    }
 }
 
-float getDistancia()
+float readUltrassonicoDireito()
 {
-    return 0.1;
+    float distancia;
+    long microsec = ultrasonic.timing();
+    distancia = ultrasonic.convert(microsec, Ultrasonic::CM);
+
+    Serial.println(distancia);
+    return distancia;
 }
 
-bool arena()
+float readUltrassonicoEsquerdo()
 {
-    analogRead()
+    float distancia;
+    long microsec = ultrasonic.timing();
+    distancia = ultrasonic.convert(microsec, Ultrasonic::CM);
 
-        //true para o caso do sensor estar na arena e false para nao
+    Serial.println(distancia);
+    return distancia;
+}
+
+bool isRadarDireito()
+{
+    distancia = readUltrassonicoDireito();
+    if (distancia > diametroArena)
+    {
+        return false;
+    }
+    else if (distancia < diametroArena)
+    {
         return true;
+    }
+}
+
+bool isRadarEsquerdo()
+{
+    distancia = readUltrassonicoEsquerdo();
+    if (distancia > diametroArena)
+    {
+        return false;
+    }
+    else if (distancia < diametroArena)
+    {
+        return true;
+    }
+}
+
+bool isArena()
+{
+    //true para o caso do sensor estar na arena e false para nao
+    int valor_piso_direito = analogRead(OPTICO_A);
+    int valor_piso_esquerdo = analogRead(OPTICO_B);
+    if (valor_piso_direito <= limiar_piso_black || valor_piso_esquerdo <= limiar_piso_black)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool isRadarFrente()
+{
+    double valorVolts = analogRead(SHARP) * 0.0048828125;
+    double distancia = 4800 / (valorVolts * 200 - 20);
+
+    if (distancia > diametro_arena)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+void atacarOponente()
+{
+    while (isArena() && isRadarFrente())
+    {
+        frente(255);
+        delay(0.4);
+    }
+}
+
+//Incluir sentido e formas diferentes de recuar
+void recuar(int velocidade)
+{
+    rodaDireita(velocidade, false);
+    rodaEsquerda(velocidade, false);
+    delay(1);
 }
 
 void loop()
 {
-    if (digitalRead(BOTAO) == 1)
-    {
-        tocarBuzzer();
-        delay(5);
+    delay(5);
+    tocarBuzzer();
+    //PROCURAR OPONETE
+    procurarOponente();
 
-        while (1)
-        {
-            //PROCURAR OPONETE
-        }
-    }
+    //ATACAR OPONENTE
+    atacarOpenente();
 }

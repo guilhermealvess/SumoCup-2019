@@ -1,4 +1,4 @@
-#define OPTICO_IN
+#define OPTICO_IN A3
 #define OPTICO_OUT
 
 void sensorLeitura()
