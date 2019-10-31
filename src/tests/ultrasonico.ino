@@ -9,23 +9,21 @@ Ultrasonic ultrasonicDireito(trigger, echo);
 
 float diametroArena = 77.0;
 
-bool ultrassonico()
+void ultrassonico()
 {
     float distancia;
-    long microsec = ultrasonic.timing();
-    distancia = ultrasonic.convert(microsec, Ultrasonic::CM);
+    long microsec = ultrasonicEsquerdo.timing();
+    distancia = ultrasonicEsquerdo.convert(microsec, Ultrasonic::CM);
 
+    Serial.println("ESQUERD0 -> ");
     Serial.println(distancia);
 
-    if (distancia > diametroArena)
-    {
-        return false;
-    }
-    else if (distancia < diametroArena)
-    {
-        return true;
-    }
-    return false;
+    float distancia;
+    long microsec = ultrasonicDireito.timing();
+    distancia = ultrasonicDireito.convert(microsec, Ultrasonic::CM);
+
+    Serial.println("DIREITO -> ");
+    Serial.println(distancia);
 }
 
 void setup()

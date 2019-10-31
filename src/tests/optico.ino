@@ -4,7 +4,7 @@
 void sensorLeitura()
 {
     int valor = analogRead(OPTICO_IN);
-    Serial.ptintln();
+    Serial.println();
 }
 
 void setup()

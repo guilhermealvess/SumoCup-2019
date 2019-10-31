@@ -7,7 +7,7 @@
 Ultrasonic ultrasonicEsquerdo(TRIGGER_esq, ECHO_esq);
 Ultrasonic ultrasonicDireito(TRIGGER_dir, ECHO_dir);
 
-#define BUZZER A3
+#define LED A3
 
 #define MOTOR_D1 3
 #define MOTOR_D2 4
@@ -22,36 +22,10 @@ Ultrasonic ultrasonicDireito(TRIGGER_dir, ECHO_dir);
 
 #define SHARP A2
 
-#define diametro_arena 77.0
+#define T 0.5
 
+float diametro_arena = 77.0;
 int limiar_piso_black = 500;
-
-void setup()
-{
-    // setando pinos sharp
-
-    // setando pinos ultrasonico direito
-    pinMode(ECHO_dir, INPUT);
-    pinMode(TRIGGER_dir, OUTPUT);
-
-    // setando pinos ultrasonico esquerdo
-    pinMode(ECHO_esq, INPUT);
-    pinMode(TRIGGER_esq, OUTPUT);
-
-    // setando pinos buzzer
-    pinMode(BUZZER, OUTPUT);
-
-    // setando pinos refletancia
-
-    // setando pinos botão
-
-    // setando PWM dos Motores
-    pinMode(PWMA, OUTPUT);
-    pinMode(PWMB, OUTPUT);
-
-    digitalWrite(PWMA, 1);
-    digitalWrite(PWMB, 1);
-}
 
 void rodaDireita(int velocidade, bool sentido)
 {
@@ -87,52 +61,35 @@ void frente(int velocidade)
 {
     rodaDireita(velocidade, true);
     rodaEsquerda(velocidade, true);
-    digitalWrite(STDBY, 1);
+    digitalWrite(STDBY, 0);
 }
 
 void traz(int velocidade)
 {
     rodaDireita(velocidade, false);
     rodaEsquerda(velocidade, false);
-    digitalWrite(STDBY, 1);
+    digitalWrite(STDBY, 0);
 }
 
 void parar()
 {
     digitalWrite(MOTOR_D, 0);
     digitalWrite(MOTOR_E, 0);
-    digitalWrite(STDBY, 0);
+    digitalWrite(STDBY, 1);
 }
 
 void giroHorario(int velocidade)
 {
     rodaEsquerda(velocidade, true);
     rodaDireita(velocidade, false);
-    digitalWrite(STDBY, 1);
+    digitalWrite(STDBY, 0);
 }
 
 void giroAntiHorario(int velocidade)
 {
     rodaEsquerda(velocidade, false);
     rodaDireita(velocidade, true);
-    digitalWrite(STDBY, 1);
-}
-
-void tocarBuzzer()
-{
-    // Implementar
-    float seno;
-    int frequencia;
-
-    for (int x = 0; x < 180; x++)
-    {
-        //converte graus para radiando e depois obtém o valor do seno
-        seno = (sin(x * 3.1416 / 180));
-        //gera uma frequência a partir do valor do seno
-        frequencia = 2000 + (int(seno * 1000));
-        tone(BUZZER, frequencia);
-        delay(1);
-    }
+    digitalWrite(STDBY, 0);
 }
 
 void procurarOponente()
@@ -140,7 +97,7 @@ void procurarOponente()
     while (isArena() && !isRadarDireito() && !isRadarEsquerdo())
     {
         giroHorario(255);
-        delay(0.5);
+        //delay(T);
     }
 }
 
@@ -201,6 +158,7 @@ bool isArena()
     }
     else
     {
+        recuar();
         return true;
     }
 }
@@ -225,7 +183,7 @@ void atacarOponente()
     while (isArena() && isRadarFrente())
     {
         frente(255);
-        delay(0.4);
+        //delay(0.4);
     }
 }
 
@@ -234,16 +192,46 @@ void recuar(int velocidade)
 {
     rodaDireita(velocidade, false);
     rodaEsquerda(velocidade, false);
+    delay(2 * T);
+    parar();
+}
+
+void ledStart()
+{
+}
+
+void setup()
+{
+    // setando pinos ultrasonico direito
+    pinMode(ECHO_dir, INPUT);
+    pinMode(TRIGGER_dir, OUTPUT);
+
+    // setando pinos ultrasonico esquerdo
+    pinMode(ECHO_esq, INPUT);
+    pinMode(TRIGGER_esq, OUTPUT);
+
+    // setando pinos buzzer
+    pinMode(LED, OUTPUT);
+
+    // setando PWM dos Motores
+    pinMode(PWMA, OUTPUT);
+    pinMode(PWMB, OUTPUT);
+
+    digitalWrite(PWMA, 1);
+    digitalWrite(PWMB, 1);
+
+    digitalWrite(LED, 1);
     delay(1);
+    digitalWrite(LED, 0);
+    delay(4);
+    digitalWrite(LED, 1);
 }
 
 void loop()
 {
-    delay(5);
-    tocarBuzzer();
     //PROCURAR OPONETE
     procurarOponente();
 
     //ATACAR OPONENTE
-    atacarOpenente();
+    atacarOponente();
 }
