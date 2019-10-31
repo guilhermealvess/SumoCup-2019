@@ -14,7 +14,7 @@ Ultrasonic ultrasonicDireito(TRIGGER_dir, ECHO_dir);
 #define MOTOR_E1 5
 #define MOTOR_E2 6
 #define PWMD 7
-#define PWM 8
+#define PWME 8
 #define STDBY 9
 
 #define OPTICO_A A0
@@ -24,7 +24,7 @@ Ultrasonic ultrasonicDireito(TRIGGER_dir, ECHO_dir);
 
 #define T 0.5
 
-float diametro_arena = 77.0;
+float diametroArena = 77.0;
 int limiar_piso_black = 500;
 
 void rodaDireita(int velocidade, bool sentido)
@@ -73,8 +73,10 @@ void traz(int velocidade)
 
 void parar()
 {
-    digitalWrite(MOTOR_D, 0);
-    digitalWrite(MOTOR_E, 0);
+    digitalWrite(MOTOR_D1, 0);
+    digitalWrite(MOTOR_E1, 0);
+    digitalWrite(MOTOR_D2, 0);
+    digitalWrite(MOTOR_E2, 0);
     digitalWrite(STDBY, 1);
 }
 
@@ -104,8 +106,8 @@ void procurarOponente()
 float readUltrassonicoDireito()
 {
     float distancia;
-    long microsec = ultrasonic.timing();
-    distancia = ultrasonic.convert(microsec, Ultrasonic::CM);
+    long microsec = ultrasonicDireito.timing();
+    distancia = ultrasonicDireito.convert(microsec, Ultrasonic::CM);
 
     Serial.println(distancia);
     return distancia;
@@ -114,8 +116,8 @@ float readUltrassonicoDireito()
 float readUltrassonicoEsquerdo()
 {
     float distancia;
-    long microsec = ultrasonic.timing();
-    distancia = ultrasonic.convert(microsec, Ultrasonic::CM);
+    long microsec = ultrasonicEsquerdo.timing();
+    distancia = ultrasonicEsquerdo.convert(microsec, Ultrasonic::CM);
 
     Serial.println(distancia);
     return distancia;
@@ -123,7 +125,7 @@ float readUltrassonicoEsquerdo()
 
 bool isRadarDireito()
 {
-    distancia = readUltrassonicoDireito();
+    float distancia = readUltrassonicoDireito();
     if (distancia > diametroArena)
     {
         return false;
@@ -136,7 +138,7 @@ bool isRadarDireito()
 
 bool isRadarEsquerdo()
 {
-    distancia = readUltrassonicoEsquerdo();
+    float distancia = readUltrassonicoEsquerdo();
     if (distancia > diametroArena)
     {
         return false;
@@ -158,7 +160,7 @@ bool isArena()
     }
     else
     {
-        recuar();
+        recuar(255);
         return true;
     }
 }
@@ -168,7 +170,7 @@ bool isRadarFrente()
     double valorVolts = analogRead(SHARP) * 0.0048828125;
     double distancia = 4800 / (valorVolts * 200 - 20);
 
-    if (distancia > diametro_arena)
+    if (distancia > diametroArena)
     {
         return false;
     }
@@ -196,10 +198,6 @@ void recuar(int velocidade)
     parar();
 }
 
-void ledStart()
-{
-}
-
 void setup()
 {
     // setando pinos ultrasonico direito
@@ -214,11 +212,11 @@ void setup()
     pinMode(LED, OUTPUT);
 
     // setando PWM dos Motores
-    pinMode(PWMA, OUTPUT);
-    pinMode(PWMB, OUTPUT);
+    pinMode(PWMD, OUTPUT);
+    pinMode(PWME, OUTPUT);
 
-    digitalWrite(PWMA, 1);
-    digitalWrite(PWMB, 1);
+    digitalWrite(PWMD, 1);
+    digitalWrite(PWME, 1);
 
     digitalWrite(LED, 1);
     delay(1);

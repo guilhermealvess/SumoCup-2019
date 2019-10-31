@@ -58,8 +58,10 @@ void frente(int velocidade)
 
 void parar()
 {
-    digitalWrite(MOTOR_D, 0);
-    digitalWrite(MOTOR_E, 0);
+    digitalWrite(MOTOR_D1, 0);
+    digitalWrite(MOTOR_E1, 0);
+    digitalWrite(MOTOR_D2, 0);
+    digitalWrite(MOTOR_E2, 0);
     digitalWrite(STDBY, 1);
 }
 
